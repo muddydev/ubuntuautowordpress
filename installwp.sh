@@ -1,16 +1,4 @@
 #!/bin/bash
-#
-# Install WordPress on a Ubuntu 13+ VPS
-#
-#echo ""
-#echo -e "\e[1;31m--------------------------------------------------\e[00m"
-#echo -e "\e[01;31m[✓]\e[00m Enter the interface to scan from as the source"
-#echo -e "\e[1;31m--------------------------------------------------\e[00m"
-#echo ""
-#echo -e "\e[1;31m--------------------------------------------------\e[00m"
-#echo -e "\e[01;31m[✓]\e[00m Enter the interface to scan from as the source"
-#echo -e "\e[1;31m--------------------------------------------------\e[00m"
-
 # run as root 
 if [[ $UID != 0 ]]; then
     echo "Please run this script with sudo:"
@@ -26,8 +14,6 @@ bold=`tput bold`
 
 # start
 clear
-#for i in {16..21} {21..16} ; do echo -en "\e[48;5;${i}m \e[0m" ; done ; echo
-#for i in {16..39} {21..16} ; do echo -en "\e[48;5;${i}m \e[0m" ; done ; echo
 echo ""
 echo -e "\e[1;31m--------------------------------------------------\e[00m"
 echo -e "\e[01;31m[-.-]\e[00m Muddydev Ubuntu wordpress installer v1.2"
@@ -201,9 +187,11 @@ else
 	echo "Skipping Apache site install."
 	echo ""
 fi
-#################
-##  Certbot #####
-#################
+#----------------------
+#┌─┐┌─┐┬─┐┌┬┐┌┐ ┌─┐┌┬┐
+#│  ├┤ ├┬┘ │ ├┴┐│ │ │ 
+#└─┘└─┘┴└─ ┴ └─┘└─┘ ┴ 
+#----------------------
 #read -e -p "Install SSL wil Certbot (y/n)" sslinstall
 sslinstall=y
 if [ $sslinstall == "y" ]; then
