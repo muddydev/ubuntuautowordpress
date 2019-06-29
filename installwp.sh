@@ -6,6 +6,10 @@
 #echo -e "\e[1;31m--------------------------------------------------\e[00m"
 #echo -e "\e[01;31m[✓]\e[00m Enter the interface to scan from as the source"
 #echo -e "\e[1;31m--------------------------------------------------\e[00m"
+#echo ""
+#echo -e "\e[1;31m--------------------------------------------------\e[00m"
+#echo -e "\e[01;31m[✓]\e[00m Enter the interface to scan from as the source"
+#echo -e "\e[1;31m--------------------------------------------------\e[00m"
 
 # run as root 
 if [[ $UID != 0 ]]; then
@@ -21,18 +25,23 @@ normal=`tput sgr0`
 bold=`tput bold`
 
 # start
+clear
+#for i in {16..21} {21..16} ; do echo -en "\e[48;5;${i}m \e[0m" ; done ; echo
+#for i in {16..39} {21..16} ; do echo -en "\e[48;5;${i}m \e[0m" ; done ; echo
+echo ""
 echo -e "\e[1;31m--------------------------------------------------\e[00m"
-echo -e "\e[01;31m[-.-]\e[00m Muddydev Ubuntu wordpress installer"
+echo -e "\e[01;31m[-.-]\e[00m Muddydev Ubuntu wordpress installer v1.2"
 echo -e "\e[1;31m--------------------------------------------------\e[00m"
-read -e -p "Installer adds site files to /var/www, are you read -ey (y/n)? "
+echo ""
+read -e -p "Installer adds site files to /var/www, Is that ok (y/n)? "
 [ "$(echo $REPLY | tr [:upper:] [:lower:])" == "y" ] || exit
 
 # Install WP
-read -e -p "Install WordPress (y/n)? " wpFiles
-
+#read -e -p "Would you like to download the newest version of WordPress (y/n)? " wpFiles
+wpFiles=y
 if [ $wpFiles == "y" ]; then
-	read -e -p "Database name: " dbname
-	read -e -p "Database username: " dbuser
+	read -e -p "What would you like the database to be called: " dbname
+	read -e -p "Who will be the database user account (usually wordpress): " dbuser
 
 	# If you are going to use root ask about it	
 	if [ $dbuser == 'root' ]; then
@@ -49,7 +58,8 @@ if [ $wpFiles == "y" ]; then
 	echo " "
 
 	# Create MySQL database
-	read -e -p "Add MySQL DB user and tables (y/n)? " dbadd
+	#read -e -p "Auto Create database and user if not found? (y/n) " dbadd
+	dbadd=y
 	if [ $dbadd == "y" ]; then
 		read -e -s -p "Enter your MySQL root password: " rootpass
 		echo " "
@@ -58,13 +68,16 @@ if [ $wpFiles == "y" ]; then
 			echo "CREATE DATABASE $dbname;" | mysql -u root -p$rootpass
 
 			if [ -d /var/lib/mysql/$dbname ]; then
-				echo "${green}New MySQL database ($dbname) was successfully created${normal}"
+				echo " "
+				#echo "${green}New MySQL database ($dbname) was successfully created${normal}"
+				echo -e "\e[01;31m[✓]\e[00m New MySQL database ($dbname) was successfully created"
+				echo " "
 			else
 				echo "${red}New MySQL database ($dbname) faild to be created${normal}"
 			fi
 
 		else
-			echo "${red}Your MySQL database ($dbname) alread -ey exists${normal}"
+			echo "${red}Your MySQL database ($dbname) already exists${normal}"
 		fi
 		echo "Checking whether the $dbuser exists and has privileges"
 
@@ -73,7 +86,7 @@ if [ $wpFiles == "y" ]; then
 			echo "CREATE USER '$dbuser'@'localhost' IDENTIFIED BY '$userpass';" | mysql -u root -p$rootpass
 			echo "${green}New MySQL user ($dbuser) was successfully created${normal}"
 		else
-			echo "${red}This MySQL user ($dbuser) alread -ey exists${normal}"
+			echo "${red}This MySQL user ($dbuser) already exists${normal}"
 		fi
 
 		user_has_privilage=`mysql -u root -p$rootpass -e "SELECT User FROM mysql.db WHERE db = '$dbname' AND user = '$dbuser'" | wc -c`
@@ -82,7 +95,7 @@ if [ $wpFiles == "y" ]; then
 			echo "FLUSH PRIVILEGES;" | mysql -u root -p$rootpass
 			echo "${green}Add privilages for user ($dbuser) to DB $dbname${normal}"
 		else 
-			echo "${red}User ($dbuser) alread -ey has privilages to DB $dbname${normal}"
+			echo "${red}User ($dbuser) already has privilages to DB $dbname${normal}"
 		fi
 
 	fi
@@ -91,7 +104,7 @@ if [ $wpFiles == "y" ]; then
 	read -e -r -p "Enter your URL without www [e.g. example.com]: " wpURL
 	if [ ! -d /var/www/$wpURL ]; then
 		cd /var/www
-		wget http://wordpress.org/latest.tar.gz
+		wget -q http://wordpress.org/latest.tar.gz
 		tar -xzf latest.tar.gz --transform s/wordpress/$wpURL/
 		rm latest.tar.gz
 		if [ -d /var/www/$wpURL ]; then
@@ -113,22 +126,21 @@ if [ $wpFiles == "y" ]; then
 			echo "${red}Failed to create WP files. Install them manually.${normal}"
 		fi
 	else
-		echo "${red}Site folder alread -ey exists.${normal}"
+		echo "${red}Site folder already exists.${normal}"
 	fi
 
 else
 	echo "Skipping WordPress install."
 fi
-
 # Create Apache virtual host
-read -e -p "Do you want to install Apache vhost (y/n)? " apacheFiles
-
+#read -p "Do you want to install Apache vhost (y/n)? " apacheFiles
+apacheFiles=y
 if [ $apacheFiles == "y" ]; then
 
 	if [ -f /etc/apache2/sites-available/$wpURL ]; then
-	    echo "${red}This site alread -ey has a vhost file.${normal}"
+	    echo "${red}This site already has a vhost file.${normal}"
 	else
-
+	echo -e "\e[01;31m[✓]\e[00m Configuring the apache vhost"
 	echo "
 # Added to mitigate CVE-2017-8295 vulnerability
 UseCanonicalName On
@@ -150,6 +162,7 @@ UseCanonicalName On
         ErrorLog ${APACHE_LOG_DIR}/error.log
         CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
+
 " > /etc/apache2/sites-available/$wpURL.conf
 
 	if [ -f /etc/apache2/sites-available/$wpURL.conf ]; then
@@ -159,34 +172,44 @@ UseCanonicalName On
 	fi
 
 fi
-
 # Enable the site
 a2ensite $wpURL
+echo ""
+echo -e "\e[01;32m[~]\e[00m Apache needs Reloaded. Gonna do it now"
+echo ""
 service apache2 reload
-
-curlText=`curl --user-agent "fogent" --silent "http://$wpURL/wp-admin/install.php" | grep -o -m 1 "Welcome to the famous five minute WordPress installation process" | wc -c`
-
+sleep 3
+echo ""
+echo -e "\e[01;31m[✓]\e[00m Apache Reloaded"
+echo ""
+#curlText=`curl --user-agent "fogent" --silent "http://$wpURL/wp-admin/install.php" | grep -o -m 1 "Welcome to the famous five minute WordPress installation process" | wc -c`
+curlText=`curl --silent https://lookingafterlupin.com/wp-admin/install.php | wc -c`
 # http://www.cyberciti.biz/faq/how-to-find-out-the-ip-address-assigned-to-eth0-and-display-ip-only/
-yourip=`curl ifconfig.me`
+yourip=`curl --silent ifconfig.me`
 
-if [ $curlText == '65' ]; then
+if [ $curlText == '11946' ]; then
   echo "${green}Go to http://$wpURL and finish install.${normal}";
 else
-  echo "${green}Go to http://$yourip/$wpURL and config your DNS after.${normal}";
+  echo ""
+  echo ""
+  echo "${green}Go to http://$wpURL and finish install.${normal}";
+  echo ""
+  echo ""
 fi
-
 else
+	echo ""
 	echo "Skipping Apache site install."
+	echo ""
 fi
 #################
 ##  Certbot #####
 #################
-read -e -p "Install SSL wil Certbot " sslinstall
-
+#read -e -p "Install SSL wil Certbot (y/n)" sslinstall
+sslinstall=y
 if [ $sslinstall == "y" ]; then
 	certbot
 	echo "${green}Finished!${normal}"
-	break
 else
 	echo "${green}Finished with no SSL configured${normal}"
 fi
+echo 'done!'
