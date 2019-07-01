@@ -14,11 +14,13 @@ bold=`tput bold`
 
 # start
 clear
-echo ""
 echo -e "\e[1;31m--------------------------------------------------\e[00m"
 echo -e "\e[01;31m[-.-]\e[00m Muddydev Ubuntu wordpress installer v1.2"
 echo -e "\e[1;31m--------------------------------------------------\e[00m"
 echo ""
+echo -e "\e[01;31m[x]\e[00m Dont forget to configure your DNS FIRST!!"
+echo ""
+echo -e "\e[1;31m--------------------------------------------------\e[00m"
 read -e -p "Installer adds site files to /var/www, Is that ok (y/n)? "
 [ "$(echo $REPLY | tr [:upper:] [:lower:])" == "y" ] || exit
 
