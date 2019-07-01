@@ -202,4 +202,10 @@ if [ $sslinstall == "y" ]; then
 else
 	echo "${green}Finished with no SSL configured${normal}"
 fi
+echo -e "\e[1;31m--------------------------------------------------\e[00m"
+echo -e "\e[01;31m[✓]\e[00m Currently active and enabled apache sites"
+echo -e "\e[1;31m--------------------------------------------------\e[00m"
+apache2ctl -S | grep www | grep alias | cut -d '.' -f2 | sort -u
+echo -e "\e[1;31m--------------------------------------------------\e[00m"
+echo ''
 echo 'done!'
